@@ -3107,7 +3107,7 @@ void EditorNode::set_addon_plugin_enabled(const String &p_addon, bool p_enabled,
 	}
 
 	EditorPlugin *ep = memnew(EditorPlugin);
-	ep->set_script(script.get_ref_ptr());
+	ep->set_script(script);
 	plugin_addons[p_addon] = ep;
 	add_editor_plugin(ep, p_config_changed);
 
@@ -5353,10 +5353,8 @@ void EditorNode::_update_video_driver_color() {
 	// TODO: Probably should de-hardcode this and add to editor settings.
 	if (video_driver->get_text() == "GLES2") {
 		video_driver->add_color_override("font_color", Color::hex(0x5586a4ff));
-	} else if (video_driver->get_text() == "GLES3") {
-		video_driver->add_color_override("font_color", Color::hex(0xa5557dff));
 	} else if (video_driver->get_text() == "Vulkan") {
-		video_driver->add_color_override("font_color", Color::hex(0xad1128ff));
+		video_driver->add_color_override("font_color", theme_base->get_color("vulkan_color", "Editor"));
 	}
 }
 
@@ -5825,7 +5823,7 @@ EditorNode::EditorNode() {
 	EDITOR_DEF_RST("interface/scene_tabs/show_thumbnail_on_hover", true);
 	EDITOR_DEF_RST("interface/inspector/capitalize_properties", true);
 	EDITOR_DEF_RST("interface/inspector/default_float_step", 0.001);
-	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::REAL, "interface/inspector/default_float_step", PROPERTY_HINT_EXP_RANGE, "0,1,0"));
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::REAL, "interface/inspector/default_float_step", PROPERTY_HINT_RANGE, "0,1,0"));
 	EDITOR_DEF_RST("interface/inspector/disable_folding", false);
 	EDITOR_DEF_RST("interface/inspector/auto_unfold_foreign_scenes", true);
 	EDITOR_DEF("interface/inspector/horizontal_vector2_editing", false);
@@ -6408,6 +6406,8 @@ EditorNode::EditorNode() {
 	video_driver->set_focus_mode(Control::FOCUS_NONE);
 	video_driver->connect("item_selected", this, "_video_driver_selected");
 	video_driver->add_font_override("font", gui_base->get_font("bold", "EditorFonts"));
+	// TODO re-enable when GLES2 is ported
+	video_driver->set_disabled(true);
 	right_menu_hb->add_child(video_driver);
 
 	String video_drivers = ProjectSettings::get_singleton()->get_custom_property_info()["rendering/quality/driver/driver_name"].hint_string;
